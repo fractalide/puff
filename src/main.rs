@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate actix_web;
 
 use std::{env, io};
@@ -11,26 +10,6 @@ use actix_web::{
     HttpResponse, HttpRequest, HttpServer,
     Result,
 };
-#[get("/favicon.ico")]
-fn favicon() -> Result<fs::NamedFile> {
-    Ok(fs::NamedFile::open("static/favicon.ico")?)
-}
-#[get("/jolt")]
-fn jolt() -> Result<fs::NamedFile> {
-    Ok(fs::NamedFile::open("static/jolt/index.html")?)
-}
-#[get("/console.js")]
-fn console_js() -> Result<fs::NamedFile> {
-    Ok(fs::NamedFile::open("static/jolt/console.js")?)
-}
-#[get("/console.wasm")]
-fn console_wasm() -> Result<fs::NamedFile> {
-    Ok(fs::NamedFile::open("static/jolt/console.wasm")?)
-}
-#[get("/styles.css")]
-fn styles_css() -> Result<fs::NamedFile> {
-    Ok(fs::NamedFile::open("static/jolt/styles.css")?)
-}
 fn p404() -> Result<fs::NamedFile> {
     Ok(fs::NamedFile::open("static/404.html")?.set_status_code(StatusCode::NOT_FOUND))
 }
@@ -39,19 +18,19 @@ fn main() -> io::Result<()> {
     env::set_var("RUST_LOG", "actix_web=debug");
     env_logger::init();
     let sys = actix_rt::System::new("puff");
+    let run_dir = args[2].clone();
 
-    HttpServer::new(|| {
+    HttpServer::new(move || {
         App::new()
             // cookie session middleware
             .wrap(CookieSession::signed(&[0; 32]).secure(false))
             // enable logger - always register actix-web Logger middleware last
             .wrap(middleware::Logger::default())
-            // register favicon
-            .service(favicon)
-            .service(jolt)
-            .service(console_js)
-            .service(console_wasm)
-            .service(styles_css)
+            .service(fs::Files::new("favicon.ico", &run_dir).index_file("favicon.ico"))
+            .service(fs::Files::new("jolt", format!("{}/jolt", &run_dir)).index_file("index.html"))
+            .service(fs::Files::new("console.js", format!("{}/jolt", &run_dir)).index_file("console.js"))
+            .service(fs::Files::new("console.wasm", format!("{}/jolt", &run_dir)).index_file("console.wasm"))
+            .service(fs::Files::new("styles.css", format!("{}/jolt", &run_dir)).index_file("styles.css"))
             .service(web::resource("/").route(web::get().to(|req: HttpRequest| {
                 println!("{:?}", req);
                 HttpResponse::Found()
