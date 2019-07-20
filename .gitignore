@@ -1,2 +1,4 @@
 /target
 **/*.rs.bk
+static/jolt
+nix/result
