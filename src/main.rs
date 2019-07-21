@@ -26,11 +26,12 @@ fn main() -> io::Result<()> {
             .wrap(CookieSession::signed(&[0; 32]).secure(false))
             // enable logger - always register actix-web Logger middleware last
             .wrap(middleware::Logger::default())
-            .service(fs::Files::new("favicon.ico", &run_dir).index_file("favicon.ico"))
+            .service(fs::Files::new("favicon.ico", format!("{}", &run_dir)).index_file("favicon.ico"))
             .service(fs::Files::new("jolt", format!("{}/jolt", &run_dir)).index_file("index.html"))
             .service(fs::Files::new("console.js", format!("{}/jolt", &run_dir)).index_file("console.js"))
             .service(fs::Files::new("console.wasm", format!("{}/jolt", &run_dir)).index_file("console.wasm"))
             .service(fs::Files::new("styles.css", format!("{}/jolt", &run_dir)).index_file("styles.css"))
+            .service(fs::Files::new("faucet", format!("{}", &run_dir)).index_file("faucet_sk.json"))
             .service(web::resource("/").route(web::get().to(|req: HttpRequest| {
                 println!("{:?}", req);
                 HttpResponse::Found()
