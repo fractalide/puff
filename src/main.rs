@@ -31,7 +31,7 @@ fn main() -> io::Result<()> {
             .service(fs::Files::new("console.js", format!("{}/jolt", &run_dir)).index_file("console.js"))
             .service(fs::Files::new("console.wasm", format!("{}/jolt", &run_dir)).index_file("console.wasm"))
             .service(fs::Files::new("styles.css", format!("{}/jolt", &run_dir)).index_file("styles.css"))
-            .service(fs::Files::new("faucet", format!("{}", &run_dir)).index_file("faucet_sk.json"))
+            .service(fs::Files::new("faucet", format!("{}", &run_dir)).index_file("faucet.json"))
             .service(web::resource("/").route(web::get().to(|req: HttpRequest| {
                 println!("{:?}", req);
                 HttpResponse::Found()

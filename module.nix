@@ -3,9 +3,9 @@ with lib;
 let
   pkg-puff = import ./nix/default.nix {};
   cfg = config.services.puff;
-  faucet-sk-txt = pkgs.writeTextFile {
-    name = "faucet_sk.json";
-    text = ''{"faucet_sk":"${cfg.faucet-sk}"}'';
+  faucet-txt = pkgs.writeTextFile {
+    name = "faucet.json";
+    text = ''{"faucet_sk":"${cfg.faucet-sk}", "faucet_address":"${cfg.faucet-address}"}'';
   };
   jolt-deploy = pkgs.fetchFromGitHub {
     owner = "carbonideltd";
@@ -49,6 +49,14 @@ in {
           faucet's secret key, yes, this temporary is a dirty hack
         '';
       };
+
+      faucet-address = mkOption {
+        type = types.str;
+        default = null;
+        description = ''
+          faucet's address
+        '';
+      };
     };
   };
 
@@ -61,7 +69,7 @@ in {
         mkdir -m 0755 -p ${cfg.dataDir}
         ln -sf ${jolt-deploy}/deploy ${cfg.dataDir}/jolt
         ln -sf ${cfg.package}/static/favicon.ico ${cfg.dataDir}/favicon.ico
-        ln -sf ${faucet-sk-txt} ${cfg.dataDir}/faucet_sk.json
+        ln -sf ${faucet-txt} ${cfg.dataDir}/faucet.json
       '';
       postStop = ''
         rm -rf ${cfg.dataDir}
